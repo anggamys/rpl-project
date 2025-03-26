@@ -15,31 +15,43 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
   isAdmin   Boolean  @default(false)
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 }
 
 model Product {
-  id           Int      @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   name         String
-  slug         String   @unique
-  category     String
+  slug         String      @unique
+  categoryId   Int
+  category     Category    @relation(fields: [categoryId], references: [id])
   image        String
   price        Float
   brand        String
-  rating       Float    @default(0)
-  numReviews   Int      @default(0)
-  countInStock Int      @default(0)
+  rating       Float       @default(0)
+  numReviews   Int         @default(0)
+  countInStock Int         @default(0)
   description  String
-  isFeatured   Boolean  @default(false)
+  isFeatured   Boolean     @default(false)
   banner       String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([isFeatured])
 }
 
 model Order {
@@ -64,13 +76,13 @@ model Order {
 }
 
 model OrderItem {
-  id       Int    @id @default(autoincrement())
-  orderId  Int
-  order    Order  @relation(fields: [orderId], references: [id])
-  name     String
-  quantity Int
-  image    String
-  price    Float
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
 }
 
 model ShippingAddress {
